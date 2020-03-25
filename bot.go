@@ -23,7 +23,7 @@ func main() {
 `
 
 func init() {
-	os.Setenv("TELEGRAM_APITOKEN", "969298533:AAHrUcET5T9i9sWMcXkKwubo1id12pOQUqo")
+	os.Setenv("TELEGRAM_APITOKEN", "969298533:AAF_AE2DJfjlcVUxy1U44B185rKIFrfwzUM")
 }
 
 func main() {
@@ -53,7 +53,35 @@ func main() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 			switch update.Message.Command() {
 			case "help":
-				msg.Text = `type /eval fmt.Println("Hello, World") .`
+				msg.Text = `type /eval fmt.Println("Hello, World") now only for fmt package.
+				type /run package main
+
+				import (
+					"fmt"
+				)
+				
+				func main() {
+					fmt.Println("Hello, World")
+				}. use like go playground`
+			case "run":
+				{
+					code := strings.NewReplacer(`“`, `"`, `”`, `"`).Replace(update.Message.CommandArguments())
+					res, err := eval.GoCode(code)
+					if err != nil {
+						log.Println(err)
+						continue
+					}
+					if res.Errors != "" {
+						msg.Text = res.Errors
+					} else {
+						for _, e := range res.Events {
+							if e.Kind == "stdout" {
+								msg.Text = e.Message
+								continue
+							}
+						}
+					}
+				}
 			case "eval":
 				{
 					// handle code
