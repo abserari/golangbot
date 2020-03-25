@@ -10,6 +10,11 @@ import (
 	"github.com/yhyddr/golangbot/eval"
 )
 
+var maincode = `
+package main
+
+%s
+`
 var fmtcode = `
 package main
 
@@ -54,19 +59,18 @@ func main() {
 			switch update.Message.Command() {
 			case "help":
 				msg.Text = `type /eval fmt.Println("Hello, World") now only for fmt package.
-				type /run package main
-
+				type /run 
 				import (
 					"fmt"
 				)
 				
 				func main() {
 					fmt.Println("Hello, World")
-				}. use like go playground`
+				}. don't need package main but others are using like go playground`
 			case "run":
 				{
 					code := strings.NewReplacer(`“`, `"`, `”`, `"`).Replace(update.Message.CommandArguments())
-					res, err := eval.GoCode(code)
+					res, err := eval.GoCode(fmt.Sprintf(maincode, code))
 					if err != nil {
 						log.Println(err)
 						continue
