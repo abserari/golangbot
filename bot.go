@@ -26,6 +26,7 @@ func main() {
 	%s
 }
 `
+var setcodemode = "```go %s```"
 
 func init() {
 	os.Setenv("TELEGRAM_APITOKEN", "969298533:AAF_AE2DJfjlcVUxy1U44B185rKIFrfwzUM")
@@ -58,15 +59,12 @@ func main() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 			switch update.Message.Command() {
 			case "help":
-				msg.Text = `type /eval fmt.Println("Hello, World") now only for fmt package.
-				type /run 
-				import (
-					"fmt"
-				)
-				
+				msg.Text = `type /eval fmt.Println("Hello, World") : now only for fmt package.
+type /run import ("fmt")
 				func main() {
 					fmt.Println("Hello, World")
-				}. don't need package main but others are using like go playground`
+				}
+				 : using like go playground, but don't need package main `
 			case "run":
 				{
 					code := strings.NewReplacer(`“`, `"`, `”`, `"`).Replace(update.Message.CommandArguments())
@@ -80,7 +78,8 @@ func main() {
 					} else {
 						for _, e := range res.Events {
 							if e.Kind == "stdout" {
-								msg.Text = e.Message
+								msg.Text = fmt.Sprintf(setcodemode, e.Message)
+								msg.ParseMode = "MarkdownV2"
 								continue
 							}
 						}
@@ -107,7 +106,7 @@ func main() {
 					}
 				}
 			default:
-				msg.Text = "I don't know that command"
+				msg.Text = "I don't know that command Try /help"
 			}
 			if _, err := bot.Send(msg); err != nil {
 				log.Println(err)
