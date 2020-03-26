@@ -6,3 +6,6 @@ https://www.yuque.com/abser/solutions
 
 ## Target 
 could download mod and run your own code in cloud.
+
+[ ] On zeit so could download mod to run.
+[ ] Using go by example and make a doc in tg.
