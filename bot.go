@@ -29,11 +29,11 @@ func main() {
 var setcodemode = "```go %s```"
 
 func init() {
-	os.Setenv("TELEGRAM_APITOKEN", "969298533:AAF_AE2DJfjlcVUxy1U44B185rKIFrfwzUM")
+	os.Setenv("TELEGRAM_TECHCATS_BOT_TOKEN", "THIS IS YOUR TEMP ID")
 }
 
 func main() {
-	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_APITOKEN"))
+	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_TECHCATS_BOT_TOKEN"))
 	if err != nil {
 		log.Panic(err)
 	}
@@ -53,7 +53,8 @@ func main() {
 			continue
 		}
 
-		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+		// log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+		log.Println(update.Message.Chat.ID, "come on")
 
 		if update.Message.IsCommand() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
