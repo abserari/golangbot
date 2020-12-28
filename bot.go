@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -41,7 +42,7 @@ func main() {
 	bot.Debug = true
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
-
+	var PeopleCount int
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
@@ -66,6 +67,11 @@ type /run import ("fmt")
 					fmt.Println("Hello, World")
 				}
 				 : using like go playground, but don't need package main `
+			case "remake":
+				{
+					PeopleCount++
+					msg.Text = `您是否要发起投降, 当前投降人数 ` + strconv.Itoa(PeopleCount) + `/5. \n 输入 /remake 或 /yes 同意, /no 拒绝`
+				}
 			case "run":
 				{
 					code := strings.NewReplacer(`“`, `"`, `”`, `"`).Replace(update.Message.CommandArguments())
