@@ -33,6 +33,19 @@ var setcodemode = "```go %s```"
 // 	os.Setenv("TELEGRAM_TECHCATS_BOT_TOKEN", "THIS IS YOUR TEMP ID")
 // }
 
+var numericKeyboard = tgbotapi.NewReplyKeyboard(
+	tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton("1"),
+		tgbotapi.NewKeyboardButton("2"),
+		tgbotapi.NewKeyboardButton("3"),
+	),
+	tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton("4"),
+		tgbotapi.NewKeyboardButton("5"),
+		tgbotapi.NewKeyboardButton("6"),
+	),
+)
+
 func main() {
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_TECHCATS_BOT_TOKEN"))
 	if err != nil {
@@ -55,10 +68,20 @@ func main() {
 		}
 
 		// log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-		log.Println(update.Message.Chat.ID, "come on")
+		log.Println("come on", update.Message.Text)
+
+		if update.Message.Text == "!remake" {
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+			msg.Text = `无论生活多么困难, 我们都要面对他`
+			if _, err := bot.Send(msg); err != nil {
+				log.Println(err)
+			}
+			continue
+		}
 
 		if update.Message.IsCommand() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+
 			switch update.Message.Command() {
 			case "help":
 				msg.Text = `type /eval fmt.Println("Hello, World") : now only for fmt package.
@@ -66,10 +89,18 @@ type /run import ("fmt")
 				func main() {
 					fmt.Println("Hello, World")
 				}
-				 : using like go playground, but don't need package main `
+				 : using like go playground, but don't need package main 
+				 
+				 If you use Phone or Compatible APP, you could type /open and /close to open and close a keyboard.
+				 `
 			case "remake":
 				{
 					PeopleCount++
+					if PeopleCount > 4 {
+						msg.Text = `Remaking`
+						PeopleCount = 0
+						break
+					}
 					msg.Text = `您是否要发起投降, 当前投降人数 ` + strconv.Itoa(PeopleCount) + `/5. \n 输入 /remake 或 /yes 同意, /no 拒绝`
 				}
 			case "run":
@@ -112,6 +143,10 @@ type /run import ("fmt")
 						}
 					}
 				}
+			case "open":
+				msg.ReplyMarkup = numericKeyboard
+			case "close":
+				msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			default:
 				msg.Text = "I don't know that command Try /help"
 			}
@@ -121,13 +156,13 @@ type /run import ("fmt")
 			continue
 		}
 
-		// just repeat msg
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		// reply would refer the message
-		msg.ReplyToMessageID = update.Message.MessageID
+		// // just repeat msg
+		// msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		// // reply would refer the message
+		// msg.ReplyToMessageID = update.Message.MessageID
 
-		if _, err := bot.Send(msg); err != nil {
-			log.Println(err)
-		}
+		// if _, err := bot.Send(msg); err != nil {
+		// 	log.Println(err)
+		// }
 	}
 }
