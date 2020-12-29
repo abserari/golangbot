@@ -33,6 +33,17 @@ var setcodemode = "```go %s```"
 // 	os.Setenv("TELEGRAM_TECHCATS_BOT_TOKEN", "THIS IS YOUR TEMP ID")
 // }
 
+var inlineNumericKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonURL("进入班城剧组", "https://www.yuque.com/bandle"),
+		tgbotapi.NewInlineKeyboardButtonSwitch("转发 /remake", "/remake"),
+	),
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("yes", "/yes"),
+		tgbotapi.NewInlineKeyboardButtonData("no", "/no"),
+	),
+)
+
 var numericKeyboard = tgbotapi.NewReplyKeyboard(
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("1"),
@@ -63,12 +74,40 @@ func main() {
 
 	// update is every new message
 	for update := range updates {
+		if update.CallbackQuery != nil {
+			// just repeat the callback
+			fmt.Print(update)
+
+			bot.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data))
+
+			msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data)
+			switch update.CallbackQuery.Data {
+
+			case "/yes":
+				{
+					if PeopleCount > 4 {
+						msg.Text = `Remaking`
+						PeopleCount = 0
+						break
+					}
+					msg.Text = `您是否要发起投降, 当前投降人数 ` + strconv.Itoa(PeopleCount) + `/5. \n 输入 /remake 或 /yes 同意, /no 拒绝`
+
+				}
+			case "/no":
+				{
+					msg.Text = `您已经拒绝投降`
+
+				}
+			}
+			bot.Send(msg)
+			continue
+		}
 		if update.Message == nil { // ignore any non-Message Updates
 			continue
 		}
 
 		// log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-		log.Println("come on", update.Message.Text)
+		log.Println("come on message", update.CallbackQuery)
 
 		if update.Message.Text == "!remake" {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
@@ -102,6 +141,7 @@ type /run import ("fmt")
 						break
 					}
 					msg.Text = `您是否要发起投降, 当前投降人数 ` + strconv.Itoa(PeopleCount) + `/5. \n 输入 /remake 或 /yes 同意, /no 拒绝`
+					msg.ReplyMarkup = inlineNumericKeyboard
 				}
 			case "run":
 				{
