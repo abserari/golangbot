@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -57,6 +59,23 @@ var numericKeyboard = tgbotapi.NewReplyKeyboard(
 	),
 )
 
+func httpGet(url string) (string, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+		// handle error
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+		// handle error
+	}
+
+	return string(body), err
+}
+
 func main() {
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_TECHCATS_BOT_TOKEN"))
 	if err != nil {
@@ -109,19 +128,44 @@ func main() {
 		// log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 		log.Println("come on message", update.CallbackQuery)
 
-		if update.Message.Text == "!remake" {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
-			msg.Text = `无论生活多么困难, 我们都要面对他`
-			if _, err := bot.Send(msg); err != nil {
-				log.Println(err)
-			}
+		if update.Message.Text == "/诗歌" {
+			go func(update tgbotapi.Update) {
+				var err error
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+				msg.Text, err = httpGet("https://v1.jinrishici.com/rensheng.txt")
+				if err != nil {
+					fmt.Println(err)
+				}
+
+				if _, err := bot.Send(msg); err != nil {
+					log.Println(err)
+				}
+			}(update)
+
 			continue
 		}
 
+		// Command Handle
 		if update.Message.IsCommand() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 
 			switch update.Message.Command() {
+			case "nsfw":
+				{
+					go func(update tgbotapi.Update) {
+						var err error
+						msg.Text, err = httpGet("http://rakuen.thec.me/PixivRss/male_r18-20")
+						if err != nil {
+							fmt.Println(err)
+						}
+
+						if _, err := bot.Send(msg); err != nil {
+							log.Println(err)
+						}
+					}(update)
+
+					continue
+				}
 			case "help":
 				msg.Text = `type /eval fmt.Println("Hello, World") : now only for fmt package.
 type /run import ("fmt")
