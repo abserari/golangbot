@@ -3,22 +3,27 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/NateScarlet/pixiv/pkg/artwork"
 	"github.com/NateScarlet/pixiv/pkg/client"
 )
 
+var (
+	PHPSESSID = os.Getenv("PIXIV_PHPSESSID")
+)
+
 func main() {
 	// 使用 PHPSESSID Cookie 登录 (推荐)。
 	c := &client.Client{}
-	c.SetPHPSESSID("jsqrs5t2vceg6c7rdoc08d8jpb5im36p")
-	// c.SetPHPSESSID("38448763_W4FoUHtSZiGyu9eGA2UGQLZjubxF5T7X")
+	c.SetPHPSESSID("38448763_xzUGIUnmDwHQkGzanCoAXROOrN6G7JWR")
 	// // 通过账号密码登录(可能触发 reCAPTCHA)。
-	// c := &client.Client{}
-	// c.Login("abserari", "5Ek8ZQf4Z4vEp2U")
+	c.SetDefaultHeader("User-Agent", client.DefaultUserAgent)
+
 	// 所有查询从 context 获取客户端设置, 如未设置将使用默认客户端。
 	var ctx = context.Background()
+
 	ctx = client.With(ctx, c)
 
 	// 搜索画作
@@ -36,7 +41,6 @@ func main() {
 		}
 		break
 	}
-	fmt.Println(c.IsLoggedIn())
 
 	fmt.Println(rank.Items[0].Image, rank.Items[1].Image, rank.Items[2].Image)
 }
