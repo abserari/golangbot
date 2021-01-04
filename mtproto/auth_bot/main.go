@@ -27,8 +27,8 @@ var (
 	TgAppID   = viper.GetInt32("TgAppID") // integer value from "App api_id" field
 	TgAppHash = viper.GetString("TgAppHash")
 	// string value from "App api_hash" field
-	TgTestServer = "149.154.167.40:443" // string value from "Test configuration" field
-	TgProdServer = "149.154.167.50:443" // string value from "Production configuration" field
+	TgTestServer = "149.154.167.40:80" // string value from "Test configuration" field
+	TgProdServer = "149.154.167.51:80" // string value from "Production configuration" field
 
 	// from https://t.me/BotFather
 	TgBotToken    = viper.GetString("TgBotToken")    // bot token from BotFather
@@ -36,7 +36,7 @@ var (
 )
 
 func main() {
-
+	fmt.Println(TgAppID)
 	client, err := telegram.NewClient(telegram.ClientConfig{
 		// current dir must be writable
 		// file 'session.json' will be created here
@@ -56,19 +56,19 @@ func main() {
 	}
 
 	// Trying to auth as bot with our bot token
-	_, err = client.AuthImportBotAuthorization(&telegram.AuthImportBotAuthorizationParams{
-		Flags:        1, // reserved, must be set (not 0)
-		ApiId:        int32(TgAppID),
-		ApiHash:      TgAppHash,
-		BotAuthToken: TgBotToken,
-	})
+	_, err = client.AuthImportBotAuthorization(
+		1, // reserved, must be set (not 0)
+		int32(TgAppID),
+		TgAppHash,
+		TgBotToken,
+	)
 	if err != nil {
 		fmt.Println("ImportBotAuthorization error:", err.Error())
 		os.Exit(1)
 	}
 
 	// Request info about username of our bot
-	uname, err := client.ContactsResolveUsername(&telegram.ContactsResolveUsernameParams{Username: TgBotUserName})
+	uname, err := client.ContactsResolveUsername(TgBotUserName)
 	if err != nil {
 		fmt.Println("ResolveUsername error:", err.Error())
 		os.Exit(1)
@@ -95,7 +95,7 @@ func main() {
 	fmt.Println("Username ->", user.Username)
 	fmt.Println("FirstName ->", user.FirstName)
 	fmt.Println("LastName ->", user.LastName)
-	fmt.Println("Id ->", user.Id)
+	fmt.Println("Id ->", user.ID)
 	fmt.Println("Bot ->", user.Bot)
 	fmt.Println("Verified ->", user.Verified)
 	fmt.Println("Restricted ->", user.Restricted)
