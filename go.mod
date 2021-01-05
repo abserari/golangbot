@@ -8,6 +8,7 @@ require (
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator v9.31.0+incompatible // indirect
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
+	github.com/gotd/td v0.17.2 // indirect
 	github.com/k0kubun/pp v3.0.1+incompatible
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/spf13/viper v1.7.1
