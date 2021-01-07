@@ -1,4 +1,4 @@
-name: build and push to dockerhub
+name: build go file and push to dockerhub
 
 on: push
 
