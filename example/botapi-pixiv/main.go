@@ -1,35 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 
+	"github.com/abserari/golangbot/pkg/pixiv"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/yhyddr/golangbot/eval"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
-
-var maincode = `
-package main
-
-%s
-`
-var fmtcode = `
-package main
-
-import (
-	"fmt"
-)
-
-func main() {
-	%s
-}
-`
-var setcodemode = "```go %s```"
 
 // func init() {
 // 	os.Setenv("TELEGRAM_TECHCATS_BOT_TOKEN", "THIS IS YOUR TEMP ID")
@@ -77,7 +62,31 @@ func httpGet(url string) (string, error) {
 }
 
 func main() {
-	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_TECHCATS_BOT_TOKEN"))
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// Config file not found; ignore error if desired
+		} else {
+			// Config file was found but another error was produced
+		}
+	}
+	// Reading app id from env (never hardcode it!).
+	botToken := viper.GetString("TgBotToken")
+
+	cookies := viper.GetString("pixiv.Cookies")
+
+	logger, _ := zap.NewDevelopment(zap.IncreaseLevel(zapcore.InfoLevel))
+	defer func() { _ = logger.Sync() }()
+
+	config := &pixiv.ClientConfig{
+		Cookies: cookies,
+		Logger:  logger,
+	}
+
+	pixivClient := pixiv.NewClient(config)
+	bot, err := tgbotapi.NewBotAPI(botToken)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -85,7 +94,6 @@ func main() {
 	bot.Debug = true
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
-	var PeopleCount int
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
@@ -101,22 +109,7 @@ func main() {
 
 			msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data)
 			switch update.CallbackQuery.Data {
-
-			case "/yes":
-				{
-					if PeopleCount > 4 {
-						msg.Text = `Remaking`
-						PeopleCount = 0
-						break
-					}
-					msg.Text = `您是否要发起投降, 当前投降人数 ` + strconv.Itoa(PeopleCount) + `/5. \n 输入 /remake 或 /yes 同意, /no 拒绝`
-
-				}
-			case "/no":
-				{
-					msg.Text = `您已经拒绝投降`
-
-				}
+			default:
 			}
 			bot.Send(msg)
 			continue
@@ -125,107 +118,64 @@ func main() {
 			continue
 		}
 
-		// log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-		log.Println("come on message", update.CallbackQuery)
-
-		if update.Message.Text == "/诗歌" {
-			go func(update tgbotapi.Update) {
-				var err error
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
-				msg.Text, err = httpGet("https://v1.jinrishici.com/rensheng.txt")
-				if err != nil {
-					fmt.Println(err)
-				}
-
-				if _, err := bot.Send(msg); err != nil {
-					log.Println(err)
-				}
-			}(update)
-
-			continue
-		}
-
 		// Command Handle
 		if update.Message.IsCommand() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 
 			switch update.Message.Command() {
-			case "nsfw":
+			case "top":
 				{
 					go func(update tgbotapi.Update) {
-						var err error
-						msg.Text, err = httpGet("http://rakuen.thec.me/PixivRss/male_r18-20")
+						cmd := strings.Split(update.Message.Text, " ")
+						log.Println(cmd)
+						page := 0
+						mode := ""
+						switch len(cmd) {
+						case 3:
+							i, err := strconv.Atoi(cmd[2])
+							if err != nil {
+								// not pages
+							}
+							page = i
+
+							if cmd[1] == "nsfw" {
+								mode = "daily_r18"
+							} else {
+								mode = cmd[1]
+							}
+						case 2:
+							i, err := strconv.Atoi(cmd[1])
+							if err != nil {
+								// not pages
+							}
+							page = i
+						default:
+
+						}
+						items, err := pixivClient.Ranking(context.Background(), mode, "", "2020-01-04", page)
 						if err != nil {
-							fmt.Println(err)
+							logger.Info(err.Error())
+							msg.Text = err.Error()
+							if _, err := bot.Send(msg); err != nil {
+								log.Println(err)
+							}
+							return
+						}
+						var mediagroup = make([]interface{}, 0)
+						for i := 0; i < len(items); i++ {
+							mediagroup = append(mediagroup,
+								tgbotapi.NewInputMediaPhoto(items[i].Image.Regular))
+							if i >= 9 {
+								break
+							}
 						}
 
-						if _, err := bot.Send(msg); err != nil {
+						cfg := tgbotapi.NewMediaGroup(msg.ChatID, mediagroup)
+						if _, err := bot.Send(cfg); err != nil {
 							log.Println(err)
 						}
 					}(update)
-
 					continue
-				}
-			case "help":
-				msg.Text = `type /eval fmt.Println("Hello, World") : now only for fmt package.
-type /run import ("fmt")
-				func main() {
-					fmt.Println("Hello, World")
-				}
-				 : using like go playground, but don't need package main 
-				 
-				 If you use Phone or Compatible APP, you could type /open and /close to open and close a keyboard.
-				 `
-			case "remake":
-				{
-					PeopleCount++
-					if PeopleCount > 4 {
-						msg.Text = `Remaking`
-						PeopleCount = 0
-						break
-					}
-					msg.Text = `您是否要发起投降, 当前投降人数 ` + strconv.Itoa(PeopleCount) + `/5. \n 输入 /remake 或 /yes 同意, /no 拒绝`
-					msg.ReplyMarkup = inlineNumericKeyboard
-				}
-			case "run":
-				{
-					code := strings.NewReplacer(`“`, `"`, `”`, `"`).Replace(update.Message.CommandArguments())
-					res, err := eval.GoCode(fmt.Sprintf(maincode, code))
-					if err != nil {
-						log.Println(err)
-						continue
-					}
-					if res.Errors != "" {
-						msg.Text = res.Errors
-					} else {
-						for _, e := range res.Events {
-							if e.Kind == "stdout" {
-								msg.Text = fmt.Sprintf(setcodemode, e.Message)
-								msg.ParseMode = "MarkdownV2"
-								continue
-							}
-						}
-					}
-				}
-			case "eval":
-				{
-					// handle code
-					code := strings.NewReplacer(`“`, `"`, `”`, `"`).Replace(update.Message.CommandArguments())
-					res, err := eval.GoCode(fmt.Sprintf(fmtcode, code))
-					if err != nil {
-						log.Println(err)
-						continue
-					}
-					if res.Errors != "" {
-						msg.Text = res.Errors
-					} else {
-						for _, e := range res.Events {
-							if e.Kind == "stdout" {
-								msg.Text = e.Message
-								continue
-							}
-						}
-					}
 				}
 			case "open":
 				msg.ReplyMarkup = numericKeyboard
@@ -239,14 +189,5 @@ type /run import ("fmt")
 			}
 			continue
 		}
-
-		// // just repeat msg
-		// msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		// // reply would refer the message
-		// msg.ReplyToMessageID = update.Message.MessageID
-
-		// if _, err := bot.Send(msg); err != nil {
-		// 	log.Println(err)
-		// }
 	}
 }
