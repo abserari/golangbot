@@ -1,2 +1,4 @@
 *.pem
 config.yaml
+/main
+*.exe
