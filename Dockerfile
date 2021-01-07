@@ -8,7 +8,7 @@ FROM golang:1.15.6 AS builder
 WORKDIR /go/src/github.com/abserari/golangbot
 COPY . .
 # WORKDIR /go/src/github.com/prometheus/client_golang/examples/simple
-RUN CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags '-w' -o main 
+RUN go build -o main 
 
 # Final image.
 FROM scratch
