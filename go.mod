@@ -8,7 +8,7 @@ require (
 	github.com/everpcpc/pixiv v0.0.0-20201024033649-2be7b492c852
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 	github.com/gopherjs/gopherjs v0.0.0-20200217142428-fce0ec30dd00 // indirect
-	github.com/gotd/td v0.17.2
+	github.com/gotd/td v0.18.1
 	github.com/jarcoal/httpmock v1.0.7 // indirect
 	github.com/magiconair/properties v1.8.4 // indirect
 	github.com/mitchellh/mapstructure v1.4.0 // indirect
