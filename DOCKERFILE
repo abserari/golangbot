@@ -1,0 +1,9 @@
+FROM alpine
+
+WORKDIR /usr/src/app
+
+ENV DOCKER 1
+
+COPY . .
+
+CMD [ "golangbot"]
