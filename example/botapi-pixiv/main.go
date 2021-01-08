@@ -2,10 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -20,22 +17,26 @@ import (
 // 	os.Setenv("TELEGRAM_TECHCATS_BOT_TOKEN", "THIS IS YOUR TEMP ID")
 // }
 
-var inlineNumericKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+var inlineTopKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonURL("进入班城剧组", "https://www.yuque.com/bandle"),
 		tgbotapi.NewInlineKeyboardButtonSwitch("转发 /remake", "/remake"),
 	),
 	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("yes", "/yes"),
-		tgbotapi.NewInlineKeyboardButtonData("no", "/no"),
+		tgbotapi.NewInlineKeyboardButtonData("上一页", "pageleft"),
+		tgbotapi.NewInlineKeyboardButtonData("下一页", "pageright"),
+	),
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("上一天", "dateup"),
+		tgbotapi.NewInlineKeyboardButtonData("下一天", "datedown"),
 	),
 )
 
 var numericKeyboard = tgbotapi.NewReplyKeyboard(
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("1"),
-		tgbotapi.NewKeyboardButton("2"),
-		tgbotapi.NewKeyboardButton("3"),
+		tgbotapi.NewKeyboardButtonContact("Contact"),
+		tgbotapi.NewKeyboardButtonLocation("location"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("4"),
@@ -43,23 +44,6 @@ var numericKeyboard = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButton("6"),
 	),
 )
-
-func httpGet(url string) (string, error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		return "", err
-		// handle error
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-		// handle error
-	}
-
-	return string(body), err
-}
 
 func main() {
 	viper.SetConfigName("config")
@@ -102,9 +86,7 @@ func main() {
 	// update is every new message
 	for update := range updates {
 		if update.CallbackQuery != nil {
-			// just repeat the callback
-			fmt.Print(update)
-
+			// reply the callback from inlinekeyboard
 			bot.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data))
 
 			msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data)
@@ -114,6 +96,7 @@ func main() {
 			bot.Send(msg)
 			continue
 		}
+
 		if update.Message == nil { // ignore any non-Message Updates
 			continue
 		}
@@ -123,6 +106,8 @@ func main() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 
 			switch update.Message.Command() {
+			case "help":
+				msg.Text = `try /top`
 			case "top":
 				{
 					go func(update tgbotapi.Update) {
@@ -171,16 +156,13 @@ func main() {
 						}
 
 						cfg := tgbotapi.NewMediaGroup(msg.ChatID, mediagroup)
+						cfg.ReplyMarkup = inlineTopKeyboard
 						if _, err := bot.Send(cfg); err != nil {
 							log.Println(err)
 						}
 					}(update)
 					continue
 				}
-			case "open":
-				msg.ReplyMarkup = numericKeyboard
-			case "close":
-				msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			default:
 				msg.Text = "I don't know that command Try /help"
 			}
