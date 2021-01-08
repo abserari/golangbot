@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"gitlab.com/toby3d/telegraph"
+	"github.com/abserari/telegraph"
 )
 
 // Content in a string format (for this example).
@@ -43,6 +43,7 @@ func main() {
 		AuthorName: "dimension",                       // optional
 		AuthorURL:  "https://www.yuque.com/dimension", // optional
 	}
+	telegraph.SetSocksDialer("localhost:7890")
 	account, err = telegraph.CreateAccount(requisites)
 	errCheck(err)
 
