@@ -1,0 +1,19 @@
+# Telegram app from my.telegram.org
+TgAppID: 11111
+TgAppHash: asdfasdfasdf
+TgTestServer : 149.154.167.40:443
+TgProdServer: 149.154.167.50:443
+
+# Tgbot
+TgBotToken: 123:asdf
+TgBotUserName: asdf
+
+# Pixiv
+Username: asdf
+Password: asdf
+Cookies: asdf
+
+Socks5:
+  Address: 106.53.131.105:65431
+  Username: asdf
+  Password: asdf
