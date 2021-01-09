@@ -108,7 +108,7 @@ func main() {
 					zap.String("username", user.Username),
 				).Info("Got message")
 
-				items, err := pixivClient.Ranking(context.Background(), "", "", "", 0)
+				items, err := pixivClient.Ranking(context.Background(), "", "", time.Now().AddDate(0, 0, -1), 0)
 				if err != nil {
 					logger.Info(err.Error())
 					return err

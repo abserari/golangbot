@@ -34,7 +34,42 @@ func NewClient(config *ClientConfig) *Client {
 	c.Aapi = aapi.NewApp()
 
 	c.Logger = config.Logger
+
+	// 所有查询从 context 获取客户端设置, 如未设置将使用默认客户端。
+	var ctx = context.Background()
+
+	ctx = papi.With(ctx, c.Papi)
+
+	// 搜索画作
+	// result, _ := artwork.Search(ctx, "パチュリー・ノーレッジ")
+	// fmt.Println(result.JSON) // json return data.
+	// result.Artworks() // []artwork.Artwork，只有部分数据，通过 `Fetch` `FetchPages` 方法获取完整数据。
+	// artwork.Search(ctx, "パチュリー・ノーレッジ", artwork.SearchOptionPage(2)) // 获取第二页
+	rank := &artwork.Rank{Mode: "daily_r18"}
+	err := rank.Fetch(ctx)
+	if err != nil {
+		c.Logger.Info("login failed with cookies: " + config.Cookies)
+		panic(err)
+	}
+	c.Logger.Info("login success")
 	return &c
+}
+
+// Search
+// offset would only be 1+. For example, if set offset = 0, would be 1.
+// []artwork.Artwork，只有部分数据，通过 `Fetch` `FetchPages` 方法获取完整数据。
+// search mode
+// - s_tc: title & word
+// - s_tag: partial consistent
+func (c *Client) Search(ctx context.Context, query, order, mode, searchmode string, offset int) (art []artwork.Artwork, err error) {
+	ctx = papi.With(ctx, c.Papi)
+	// 搜索画作
+	result, err := artwork.Search(ctx, query, artwork.SearchOptionPage(offset), artwork.SearchOptionOrder(order), artwork.SearchOptionMode(mode), artwork.SearchOptionSearchMode(searchmode))
+	if err != nil {
+		return
+	}
+	art = result.Artworks()
+	return
 }
 
 // Ranking return ranking with ppai without login status.
@@ -58,7 +93,7 @@ func NewClient(config *ClientConfig) *Client {
 //  - manga
 // date: YYYYMMDD (default is yesterday)
 // page: pages
-func (c *Client) Ranking(ctx context.Context, mode, content, date string, page int) ([]artwork.RankItem, error) {
+func (c *Client) Ranking(ctx context.Context, mode, content string, date time.Time, page int) ([]artwork.RankItem, error) {
 	ctx = papi.With(ctx, c.Papi)
 	switch mode {
 	case "daily":
@@ -85,18 +120,14 @@ func (c *Client) Ranking(ctx context.Context, mode, content, date string, page i
 		content = "all"
 	}
 
-	t, err := time.Parse("2006-01-02", date)
-	if err != nil {
-		t = time.Now().Local().AddDate(0, 0, -1)
-	}
-	rank := &artwork.Rank{Mode: mode, Content: content, Date: t, Page: page}
-	err = rank.Fetch(ctx)
+	rank := &artwork.Rank{Mode: mode, Content: content, Date: date, Page: page}
+	err := rank.Fetch(ctx)
 	if err != nil {
 		c.Logger.With(
 			zap.String("mode", mode),
 			zap.Int("page", page),
 			zap.String("content", content),
-			zap.Time("usedate", t),
+			zap.Time("usedate", date),
 		).Info("Got message")
 		return nil, err
 	}

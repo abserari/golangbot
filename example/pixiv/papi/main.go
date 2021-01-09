@@ -2,9 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"os"
-	"time"
 
 	"github.com/NateScarlet/pixiv/pkg/artwork"
 	"github.com/NateScarlet/pixiv/pkg/client"
@@ -28,19 +27,31 @@ func main() {
 
 	// 搜索画作
 	// result, _ := artwork.Search(ctx, "パチュリー・ノーレッジ")
-	// fmt.Println(result.JSON) // json return data.
-	// result.Artworks() // []artwork.Artwork，只有部分数据，通过 `Fetch` `FetchPages` 方法获取完整数据。
-	// artwork.Search(ctx, "パチュリー・ノーレッジ", artwork.SearchOptionPage(2)) // 获取第二页
-	rank := &artwork.Rank{Mode: "daily_r18"}
-	for {
-		err := rank.Fetch(ctx)
-		if err != nil {
-			fmt.Println(err)
-			time.Sleep(time.Second)
-			continue
+	// fmt.Println(result.JSON)                                        // json return data.
+	// []artwork.Artwork，只有部分数据，通过 `Fetch` `FetchPages` 方法获取完整数据。
+	result, _ := artwork.Search(ctx, "パチュリー・ノーレッジ", artwork.SearchOptionPage(2), artwork.SearchOptionMode("r18"), artwork.SearchOptionOrder("date"))
+	data := result.Artworks()
+	for _, i := range data {
+		var found bool
+		for _, v := range i.Tags {
+			if v != "R-18" && v != "R-18G" {
+				continue
+			}
+			found = true
 		}
-		break
-	}
+		log.Println(found)
 
-	fmt.Println(rank.Items[0].Image, rank.Items[1].Image, rank.Items[2].Image)
+	}
+	// rank := &artwork.Rank{Mode: "daily_r18"}
+	// for {
+	// 	err := rank.Fetch(ctx)
+	// 	if err != nil {
+	// 		fmt.Println(err)
+	// 		time.Sleep(time.Second)
+	// 		continue
+	// 	}
+	// 	break
+	// }
+
+	// fmt.Println(rank.Items[0].Image, rank.Items[1].Image, rank.Items[2].Image)
 }
