@@ -29,8 +29,9 @@ func main() {
 	// result, _ := artwork.Search(ctx, "パチュリー・ノーレッジ")
 	// fmt.Println(result.JSON)                                        // json return data.
 	// []artwork.Artwork，只有部分数据，通过 `Fetch` `FetchPages` 方法获取完整数据。
-	result, _ := artwork.Search(ctx, "パチュリー・ノーレッジ", artwork.SearchOptionPage(2), artwork.SearchOptionMode("r18"), artwork.SearchOptionOrder("date"))
+	result, _ := artwork.Search(ctx, "パチュリー・ノーレッジ", artwork.SearchOptionPage(3), artwork.SearchOptionMode("r18"), artwork.SearchOptionOrder("date"))
 	data := result.Artworks()
+	log.Println(data)
 	for _, i := range data {
 		var found bool
 		for _, v := range i.Tags {

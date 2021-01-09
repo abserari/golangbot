@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -81,10 +82,15 @@ func main() {
 		}
 
 		if update.InlineQuery != nil {
-			log.Println(update.InlineQuery)
-			cmd := strings.Split(update.Message.Text, " ")
+			log.Println(update.InlineQuery.Query)
+			var query string
 			var nsfw = "r18"
-			var query = cmd[0]
+			cmd := strings.Split(update.InlineQuery.Query, " ")
+			if update.InlineQuery.Query == "" {
+				query = "top"
+			} else {
+				query = cmd[0]
+			}
 			for _, v := range cmd {
 				switch v {
 				case "r18":
@@ -102,29 +108,56 @@ func main() {
 				update.InlineQuery.Offset = "1"
 			}
 
-			i, err := strconv.Atoi(update.InlineQuery.Offset)
+			offset, err := strconv.Atoi(update.InlineQuery.Offset)
 			if err != nil {
 				logger.Error("not int offset")
 			}
-			photos , err := pixivClient.Search(context.Background(), query, "date_d", nsfw, "s_tag", i)
+			photos, err := pixivClient.Search(context.Background(), query, "date_d", nsfw, "s_tag", offset)
 			if err != nil {
-
+				logger.Error(err.Error())
 			}
+
+			resultPhotos := make([]interface{}, 0)
+			// for i, v := range photos {
+			// 	if i > 4 {
+			// 		break
+			// 	}
+			// 	picture := tgbotapi.NewInlineQueryResultPhotoWithThumb(strconv.Itoa(i+offset)+update.InlineQuery.Query, v.Image.Thumb, v.Image.Thumb)
+			// 	picture.MimeType = "image/jpeg"
+			// 	picture.Description = v.Description
+			// 	picture.Title = v.Title
+			// 	captionFormat := "<a href='%s'>%s</a>\nUser: <a href='%s'>%s</a>"
+			// 	picture.Caption = fmt.Sprintf(captionFormat, "https://www.pixiv.net/artworks/"+v.ID, v.Title, "https://www.pixiv.net/en/users/"+v.Author.ID, v.Author.Name)
+			// 	picture.ParseMode = "HTML"
+
+			// 	resultPhotos = append(resultPhotos, picture)
+			// }
 
 			for i, v := range photos {
-				thumb = InputWebDocument(img['thumb_url'], 0, 'image/jpeg', [])
-				content = InputWebDocument(img['url'], 0, 'image/jpeg', [])
-				"<a href='{img['url']}'>{img['title']}</a>\nUser: <a href='{img['user_link']}'>{img['user_name']}</a>"
+				if i > 4 {
+					break
+				}
+				picture := tgbotapi.NewInlineQueryResultArticle(strconv.Itoa(i+offset)+update.InlineQuery.Query, "hello", "hello")
+				// picture.MimeType = "image/jpeg"
+				picture.ThumbURL = v.Image.Thumb
+				picture.Description = v.Description
+				picture.Title = v.Title
+				captionFormat := "<a href='%s'>%s</a>\nUser: <a href='%s'>%s</a>"
+
+				s := tgbotapi.InputTextMessageContent{}
+				s.Text = fmt.Sprintf(captionFormat, "https://www.pixiv.net/artworks/"+v.ID, v.Title, "https://www.pixiv.net/en/users/"+v.Author.ID, v.Author.Name)
+				s.ParseMode = "HTML"
+				picture.InputMessageContent = s
+
+				resultPhotos = append(resultPhotos, picture)
 			}
-			tgbotapi.Upload
-			pictures := tgbotapi.NewInlineQueryResultPhotoWithThumb(update.InlineQuery.ID, )
-			pictures.Description = update.InlineQuery.Query
 
 			inlineConf := tgbotapi.InlineConfig{
 				InlineQueryID: update.InlineQuery.ID,
 				IsPersonal:    true,
 				CacheTime:     0,
-				Results:       []interface{}{pictures},
+				Results:       resultPhotos,
+				NextOffset:    strconv.Itoa(len(resultPhotos) - 1 + offset),
 			}
 
 			if _, err := bot.AnswerInlineQuery(inlineConf); err != nil {
