@@ -5,10 +5,12 @@
 
 # Builder image, where we build the example.
 FROM golang:1.15.6 AS builder
+ENV GOPROXY="https://goproxy.io"
+
 WORKDIR /go/src/github.com/abserari/golangbot
 COPY . .
 # WORKDIR /go/src/github.com/prometheus/client_golang/examples/simple
-RUN go build -o main 
+RUN CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o main 
 
 # Final image.
 FROM scratch

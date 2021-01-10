@@ -9,7 +9,7 @@ ENV GOPROXY="https://goproxy.io"
 WORKDIR /go/src/github.com/abserari/golangbot
 COPY . .
 # WORKDIR /go/src/github.com/prometheus/client_golang/examples/simple
-RUN go build -o ./build/pixiv-telegram-bot/main ./example/pixiv-telegram-bot/...
+RUN CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o ./build/pixiv-telegram-bot/main ./example/pixiv-telegram-bot/...
 
 # Final image.
 FROM scratch
