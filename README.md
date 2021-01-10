@@ -10,6 +10,8 @@ https://www.yuque.com/abser/solutions
 
 ![Picture](https://cdn.nlark.com/yuque/0/2021/png/176280/1610166356617-482bae82-3898-4c32-b68a-af8925ed5aa8.png?x-oss-process=image%2Fresize%2Cw_738)
 
+支持 Inline
+
 ## Usage
 
 ### Pre
