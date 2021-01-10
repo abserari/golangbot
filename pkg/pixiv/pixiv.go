@@ -61,10 +61,19 @@ func NewClient(config *ClientConfig) *Client {
 // search mode
 // - s_tc: title & word
 // - s_tag: partial consistent
-func (c *Client) Search(ctx context.Context, query, order, mode, searchmode string, offset int) (art []artwork.Artwork, err error) {
+func (c *Client) Search(ctx context.Context,
+	query string, order artwork.Order,
+	contentRating artwork.ContentRating,
+	searchmode artwork.SearchMode,
+	offset int) (art []artwork.Artwork, err error) {
 	ctx = papi.With(ctx, c.Papi)
 	// 搜索画作
-	result, err := artwork.Search(ctx, query, artwork.SearchOptionPage(offset), artwork.SearchOptionOrder(order), artwork.SearchOptionMode(mode), artwork.SearchOptionSearchMode(searchmode))
+	result, err := artwork.Search(ctx,
+		query,
+		artwork.SearchOptionPage(offset),
+		artwork.SearchOptionOrder(order),
+		artwork.SearchOptionMode(searchmode),
+		artwork.SearchOptionContentRating(contentRating))
 	if err != nil {
 		return
 	}

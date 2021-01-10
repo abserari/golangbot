@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/FlashFeiFei/yuque v0.0.0-20201105030227-c896d743585a
-	github.com/NateScarlet/pixiv v0.4.1
+	github.com/NateScarlet/pixiv v0.5.0
 	github.com/abserari/telegraph v1.2.2
 	github.com/andybalholm/brotli v1.0.1 // indirect
 	github.com/andybalholm/cascadia v1.2.0 // indirect
@@ -41,5 +41,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	honnef.co/go/tools v0.1.0 // indirect
 )
-
-replace github.com/NateScarlet/pixiv => ../../abserari/pixiv

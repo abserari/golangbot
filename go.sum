@@ -22,7 +22,12 @@ github.com/FlashFeiFei/yuque v0.0.0-20201105030227-c896d743585a/go.mod h1:w8chZn
 github.com/Joker/hpp v1.0.0/go.mod h1:8x5n+M1Hp5hC0g8okX3sR3vFQwynaX/UgSOM9MeBKzY=
 github.com/Joker/jade v1.0.1-0.20190614124447-d475f43051e7/go.mod h1:6E6s8o2AE4KhCrqr6GRJjdC/gNfTdxkIXvuGZZda2VM=
 github.com/Julusian/godocdown v0.0.0-20170816220326-6d19f8ff2df8/go.mod h1:INZr5t32rG59/5xeltqoCJoNY7e5x/3xoY9WSWVWg74=
+github.com/NateScarlet/pixiv v0.4.1 h1:YrFtqF/rKEmJD/ezKB3Xn3C0ls03DvousihCbXHOX5Q=
+github.com/NateScarlet/pixiv v0.4.1/go.mod h1:fGMfEGs4nTtgpuklSkjhkUgoZM+ydbFr22k+At+mzFE=
+github.com/NateScarlet/pixiv v0.5.0 h1:fLMoiJDOBzVsM7DTZLrIrFemm3v67+aJLt/c9iq7CV4=
+github.com/NateScarlet/pixiv v0.5.0/go.mod h1:NwVi0eBXXvaPmNrml3yeH2OhUx2jOjU7v61B8eXBp7U=
 github.com/NateScarlet/snapshot v0.3.0/go.mod h1:7zQLD0EQgpUFUcioDVHTDnOXL4i9WmapyN73bHNV0nw=
+github.com/NateScarlet/snapshot v0.5.2/go.mod h1:7zQLD0EQgpUFUcioDVHTDnOXL4i9WmapyN73bHNV0nw=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/PuerkitoBio/goquery v1.6.0 h1:j7taAbelrdcsOlGeMenZxc2AWXD5fieT1/znArdnx94=
 github.com/PuerkitoBio/goquery v1.6.0/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
