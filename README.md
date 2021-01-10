@@ -20,8 +20,9 @@ https://www.yuque.com/abser/solutions
 - PixivCookies or Username&Password [optional]
 
 ### Docker
+Download the example.yaml and edit for yourself token.
 ```bash
-docker run -v ~/config.yaml:/config.yaml yhyddr/golangbot
+docker run --restart=always -v ~/techcatbot/config.yaml:/config.yaml yhyddr/golangbot-pixiv-telegram
 ```
 
 ### Build
