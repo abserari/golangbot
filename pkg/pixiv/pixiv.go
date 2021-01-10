@@ -36,18 +36,8 @@ func NewClient(config *ClientConfig) *Client {
 	c.Logger = config.Logger
 
 	// 所有查询从 context 获取客户端设置, 如未设置将使用默认客户端。
-	var ctx = context.Background()
 
-	ctx = papi.With(ctx, c.Papi)
-
-	// 搜索画作
-	// result, _ := artwork.Search(ctx, "パチュリー・ノーレッジ")
-	// fmt.Println(result.JSON) // json return data.
-	// result.Artworks() // []artwork.Artwork，只有部分数据，通过 `Fetch` `FetchPages` 方法获取完整数据。
-	// artwork.Search(ctx, "パチュリー・ノーレッジ", artwork.SearchOptionPage(2)) // 获取第二页
-	rank := &artwork.Rank{Mode: "daily_r18"}
-	err := rank.Fetch(ctx)
-	if err != nil {
+	if ok, err := c.Papi.IsLoggedIn(); !ok {
 		c.Logger.Info("login failed with cookies: " + config.Cookies)
 		panic(err)
 	}
