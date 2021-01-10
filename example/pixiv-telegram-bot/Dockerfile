@@ -14,6 +14,7 @@ RUN CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o ./build/pixiv-
 # Final image.
 FROM scratch
 LABEL maintainer "The Techcats Authors <abserari@google.com>"
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=builder /go/src/github.com/abserari/golangbot/build/pixiv-telegram-bot .
 EXPOSE 9082
 ENTRYPOINT ["/main"]
