@@ -23,6 +23,21 @@ type userState struct {
 	mode  string
 }
 
+var modesetHelpString = `
+try /set d
+// 	d - daily (default)
+//  w - weekly
+//  m - monthly
+//  r - rookie
+//  o - original
+//  ma - male
+//  fe - female
+//  dr - daily_r18
+//  wr - weekly_r18
+//  mr - male_r18
+//  fr - female_r18
+//  rg - r18g`
+
 var pixivClient *pixiv.Client
 var updates tgbotapi.UpdatesChannel
 var bot *tgbotapi.BotAPI
@@ -208,22 +223,9 @@ func main() {
 
 			switch update.Message.Command() {
 			case "help":
-				msg.Text = `try /open or /close \n use /helpmode to see which mode could be set`
-			case "helpset":
-				msg.Text = `
-				try /mode d
-				// 	d - daily (default)
-				//  w - weekly
-				//  m - monthly
-				//  r - rookie
-				//  o - original
-				//  ma - male
-				//  fe - female
-				//  dr - daily_r18
-				//  wr - weekly_r18
-				//  mr - male_r18
-				//  fr - female_r18
-				//  rg - r18g`
+				msg.Text = `try /open or /close 
+use /set to see which mode could be set
+use /top to see top 10 pictures`
 			case "set":
 				cmd := strings.Split(update.Message.Text, " ")
 				switch len(cmd) {
@@ -260,11 +262,9 @@ func main() {
 					state := pages[update.Message.From.ID]
 					state.mode = mode
 					pages[update.Message.From.ID] = state
-					msg.Text = mode
-				case 1:
-					msg.Text = "No mode set try /helpmode"
+					msg.Text = fmt.Sprintf("now mode %s", mode)
 				default:
-					msg.Text = "wrong mode set try /helpmode"
+					msg.Text = CurrentState(update.Message.From.ID)
 				}
 			case "top":
 				{
@@ -381,3 +381,9 @@ var numericKeyboard = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButton("/datedown"),
 	),
 )
+
+func CurrentState(id int) string {
+	return strings.Replace(modesetHelpString,
+		pages[id].mode,
+		fmt.Sprintf("%s (default)", pages[id].mode), 1)
+}

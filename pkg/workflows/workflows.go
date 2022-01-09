@@ -1,9 +1,8 @@
-package services
+package workflows
 
 import (
 	"time"
 
-	"github.com/abserari/golangbot/pkg/services/activities"
 	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 )
@@ -27,7 +26,7 @@ func GetAndSendMessage(ctx workflow.Context, url string) error {
 	ctx = workflow.WithActivityOptions(ctx, options)
 
 	var message = "test" + url
-	future := workflow.ExecuteActivity(ctx, activities.SendMessage, message)
+	future := workflow.ExecuteActivity(ctx, SendMessage, message)
 
 	var serr error
 	err := future.Get(ctx, &serr)

@@ -40,13 +40,13 @@ func main() {
 
 	username := viper.GetString("Username")
 	password := viper.GetString("Password")
-	cookies := viper.GetString("Cookies")
+	cookies := viper.GetString("pixiv.Cookies")
 
 	socks5Username := viper.GetString("Socks5.Username")
 	socks5Pwd := viper.GetString("Socks5.Password")
 	socks5Addr := viper.GetString("Socks5.Address")
 
-	log.Println(socks5Addr)
+	log.Println(socks5Addr, cookies)
 
 	logger, _ := zap.NewDevelopment(zap.IncreaseLevel(zapcore.InfoLevel))
 	defer func() { _ = logger.Sync() }()
@@ -66,8 +66,9 @@ func main() {
 	if err != nil {
 		logger.Error(err.Error())
 	}
+	home = "./"
 	sessionDir := filepath.Join(home, ".td")
-	if err := os.MkdirAll(sessionDir, 0600); err != nil {
+	if err := os.MkdirAll(sessionDir, 0666); err != nil {
 		logger.Error(err.Error())
 	}
 

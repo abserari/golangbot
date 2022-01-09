@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/abserari/golangbot/pkg/services"
+	"github.com/abserari/golangbot/pkg/workflows"
 	"go.temporal.io/sdk/client"
 )
 
@@ -24,7 +24,7 @@ func main() {
 
 	var hello = "hello"
 
-	we, err := c.ExecuteWorkflow(context.Background(), options, services.GetAndSendMessage, hello)
+	we, err := c.ExecuteWorkflow(context.Background(), options, workflows.GetAndSendMessage, hello)
 	if err != nil {
 		log.Fatalln("error starting TransferMoney workflow", err)
 	}
