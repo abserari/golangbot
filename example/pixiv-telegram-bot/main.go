@@ -222,6 +222,8 @@ func main() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 
 			switch update.Message.Command() {
+			case "id":
+				msg.Text = strconv.FormatInt(update.Message.Chat.ID, 10)
 			case "help":
 				msg.Text = `try /open or /close 
 use /set to see which mode could be set

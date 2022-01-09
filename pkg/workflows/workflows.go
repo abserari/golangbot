@@ -7,6 +7,10 @@ import (
 	"go.temporal.io/sdk/workflow"
 )
 
+var NoRetry = &temporal.RetryPolicy{
+	MaximumAttempts: 1,
+}
+
 func GetAndSendMessage(ctx workflow.Context, url string) error {
 	// RetryPolicy specifies how to automatically handle retries if an Activity fails.
 	retrypolicy := &temporal.RetryPolicy{

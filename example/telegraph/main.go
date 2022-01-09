@@ -12,7 +12,7 @@ const data = `
     <figure>
         <img src="/file/6a5b15e7eb4d7329ca7af.jpg"/>
     </figure>
-    <p><i>Hello</i>, my name is <b>Page</b>, <u>look at me</u>!</p>
+    <p><i>Hello</i>, my name is <b>Tech Cats</b>, <u>look at me</u>!</p>
     <figure>
         <iframe src="https://youtu.be/fzQ6gRAEoy0"></iframe>
         <figcaption>

@@ -17,3 +17,9 @@ Socks5:
   Address: 106.53.131.105:65431
   Username: asdf
   Password: asdf
+
+telegraph:
+  AccessToken: Needed
+  ShortName: 
+  AuthorName: 
+  AuthorURL: 
