@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/abserari/golangbot/pkg/rss"
-	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"
 )
@@ -31,8 +30,6 @@ type CronResult struct {
 	Etag         string
 	LastModified time.Time
 }
-
-var Localexecutor *TgBot = NewTgBot()
 
 // SampleCronWorkflow executes on the given schedule
 // The schedule is provided when starting the Workflow
@@ -82,20 +79,20 @@ func CronRssFeedWorkflow(ctx workflow.Context) (*CronResult, error) {
 	}
 
 	var url string
+	var Localexecutor *TgBot = GetTgBot()
 
 	err = workflow.ExecuteLocalActivity(ctx1, Localexecutor.SendMessageToTelegraph, PrintFeedToTelegraph(feed)).Get(ctx, &url)
 	if err != nil {
 		workflow.GetLogger(ctx).Error("PrintFeedToTelegraph failed.", "Error", err)
 		return nil, err
 	}
-	workflow.GetLogger(ctx).Info("URL:", url)
+	workflow.GetLogger(ctx).Info("Success Create Telegraph URL:", url)
 
 	return &CronResult{RunTime: thisRunTime, Etag: feed.ETag, LastModified: feed.LastModified}, nil
 }
 
 // DoSomething is an Activity
 func RssFeed(ctx context.Context, lastRunTime, thisRunTime, lastmodified time.Time, etag string) (*rss.Feed, error) {
-	activity.GetLogger(ctx).Info("Cron job running.", "lastRunTime_exclude", lastRunTime, "thisRunTime_include", thisRunTime)
 
 	return rss.ReadFeedWithContext("https://yusank.space/index.xml", "", time.Time{}, ctx)
 

@@ -3,11 +3,15 @@ package workflows
 import (
 	"context"
 	"log"
+	"net"
+	"net/http"
+	"sync"
 
 	"github.com/abserari/telegraph"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"golang.org/x/net/proxy"
 )
 
 func SendMessage(ctx context.Context, message interface{}) error {
@@ -28,6 +32,9 @@ var account = telegraph.Account{
 }
 
 var sockAddr = viper.GetString("Socks5.Address")
+var socks5Pwd = viper.GetString("Socks5.Password")
+var socks5Username = viper.GetString("Socks5.Username")
+
 var botToken = viper.GetString("TgBotToken")
 var chatID = viper.GetInt64("TechCatsPubChatID")
 
@@ -36,12 +43,41 @@ type TgBot struct {
 	chatID int64
 }
 
+var once sync.Once
+
+var Tg *TgBot
+
+func GetTgBot() *TgBot {
+	once.Do(func() {
+		Tg = NewTgBot()
+	})
+	return Tg
+}
+
 func NewTgBot() *TgBot {
-	client, err := tgbotapi.NewBotAPI(botToken)
+	sock5, err := proxy.SOCKS5("tcp", sockAddr, &proxy.Auth{
+		User:     socks5Username,
+		Password: socks5Pwd,
+	}, proxy.Direct)
+
+	dc := sock5.(interface {
+		DialContext(ctx context.Context, network, addr string) (net.Conn, error)
+	})
+	httpClient := http.DefaultClient
+	if sockAddr != "" {
+		httpClient.Transport = &http.Transport{
+			DialContext: dc.DialContext,
+		}
+	}
+
+	log.Println(sockAddr)
+	client, err := tgbotapi.NewBotAPIWithClient(botToken, httpClient)
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 	client.Debug = true
+
 	return &TgBot{
 		client,
 		chatID,
@@ -49,7 +85,6 @@ func NewTgBot() *TgBot {
 }
 
 func (tg *TgBot) SendMessageToTelegraph(ctx context.Context, message string) (string, error) {
-	log.Println(chatID, "____________check state_______")
 	telegraph.SetSocksDialer(sockAddr)
 
 	if account.AccessToken == "" {
@@ -71,8 +106,8 @@ func (tg *TgBot) SendMessageToTelegraph(ctx context.Context, message string) (st
 
 	// Create new Telegraph page
 	pageData := telegraph.Page{
-		Title:   "My super-awesome page", // required
-		Content: content,                 // required
+		Title:   "Techcats List", // required
+		Content: content,         // required
 
 		// Not necessarily, but, hey, it's just an example.
 		AuthorName: account.AuthorName, // optional

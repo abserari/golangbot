@@ -37,7 +37,8 @@ func main() {
 
 	// }
 
-	startcron(c)
+	// startcron(c)
+	triggerTest(c)
 
 }
 
@@ -57,4 +58,19 @@ func startcron(c client.Client) {
 	}
 	log.Println("Started workflow", "WorkflowID", we.GetID(), "RunID", we.GetRunID())
 
+}
+
+func triggerTest(c client.Client) {
+	workflowID := "cron_" + uuid.New().String()
+	workflowOptions := client.StartWorkflowOptions{
+		ID:        workflowID,
+		TaskQueue: "cron",
+		// CronSchedule: "@daily",
+	}
+
+	we, err := c.ExecuteWorkflow(context.Background(), workflowOptions, workflows.CronRssFeedWorkflow)
+	if err != nil {
+		log.Fatalln("Unable to execute workflow", err)
+	}
+	log.Println("Started workflow", "WorkflowID", we.GetID(), "RunID", we.GetRunID())
 }
